@@ -1,0 +1,14 @@
+[package]
+name = "tpc9000/notifications"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors = ["tpc9000"]
+
+[dependencies]
+ReactRoblox = "jsdotlua/react-roblox@17.0.2"
+TableUtil = "tpc9000/tableutil@0.6.0"
+Async = "tpc9000/async@0.2.1"
+Roact = "jsdotlua/roact-compat@17.0.2"
+React = "jsdotlua/react@17.0.2"
