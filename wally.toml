@@ -1,7 +1,7 @@
 [package]
 name = "tpc9000/notifications"
 version = "0.1.0"
-registry = "https://github.com/UpliftGames/wally-index"
+registry = "https://github.com/Novaly-Studios/Index"
 realm = "shared"
 license = "MIT"
 authors = ["tpc9000"]
