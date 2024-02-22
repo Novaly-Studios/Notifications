@@ -32,7 +32,9 @@ return function(Props: Props)
 
     return element("Frame", {
         BackgroundTransparency = 1;
-        Size = UDim2.fromScale(1, 1);
+        AnchorPoint = Vector2.new(0, 0.5);
+        Position = UDim2.fromScale(0, 0.5);
+        Size = UDim2.fromScale(1, 0.9);
 
         ref = RootRef;
     })

@@ -23,7 +23,9 @@ local FADE_TIME = 0.5
 
 return function(Props: Props)
     local Queue, SetQueue = useState({})
+    local StateRef = React.useRef(nil)
     local Additions = Props.Additions
+    StateRef.current = Queue
 
     useEffect(function()
         for _, Addition in Additions do
@@ -33,36 +35,48 @@ return function(Props: Props)
                     local FinishDuration = Addition.Duration or Props.DefaultDuration or DEFAULT_DURATION
 
                     Async.Delay(math.max(0, FinishDuration - FADE_TIME), function()
-                        for Index, Value in Queue do
+                        local Modified = false
+
+                        for Index, Value in StateRef.current do
                             if (Value.ID == Addition.ID) then
                                 Value.Props = Merge(Value.Props, {
-                                    Fade = 1;
+                                    Fade = true;
                                 })
-                                SetQueue(table.clone(Queue))
+
+                                Modified = true
+                                break
                             end
+                        end
+
+                        if (Modified) then
+                            StateRef.current = table.clone(StateRef.current)
+                            SetQueue(StateRef.current)
                         end
                     end)
 
                     Async.Delay(FinishDuration, function()
                         local Found: number
 
-                        for Index, Value in Queue do
+                        for Index, Value in StateRef.current do
                             if (Value.ID == Addition.ID) then
                                 Found = Index
                                 break
                             end
                         end
-        
-                        table.remove(Queue, Found)
-                        SetQueue(table.clone(Queue))
+
+                        table.remove(StateRef.current, Found)
+                        StateRef.current = table.clone(StateRef.current)
+                        SetQueue(StateRef.current)
                     end)
                 end)
             end
 
             -- Update existing element.
-            for _, Value in Queue do
+            local Found = false
+
+            for _, Value in StateRef.current do
                 if (Value.ID == Addition.ID) then
-                    if (Value.Duration ~= Addition.Duration) then
+                    if (Addition.Duration) then
                         -- Cancel last removal if duration is updated.
                         local Thread = Value.Thread
 
@@ -74,21 +88,27 @@ return function(Props: Props)
                     end
 
                     Value.Props = Merge(Value.Props, Addition.Props or {})
+                    Found = true
                     break
                 end
+            end
+
+            if (Found) then
+                continue
             end
 
             -- Add new element.
             Addition = Merge(Addition, {
                 Thread = Remove();
                 Props = Merge(Addition.Props or {}, {
-                    Fade = 0;
+                    Fade = false;
                 });
             })
-            table.insert(Queue, Addition)
+            table.insert(StateRef.current, Addition)
         end
 
-        SetQueue(table.clone(Queue))
+        StateRef.current = table.clone(StateRef.current)
+        SetQueue(StateRef.current)
     end, { Additions })
 
     local ActualizedElements = {}
@@ -97,6 +117,7 @@ return function(Props: Props)
 
     for Index, Data in Queue do
         local Height = Data.Props.Height or DEFAULT_HEIGHT
+
         ActualizedElements[Data.ID] = element(
             Data.Element,
             Merge(Data.Props, {
